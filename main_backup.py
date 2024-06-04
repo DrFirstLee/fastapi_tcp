@@ -37,11 +37,11 @@ async def send_message(message: Message):
         print(f"Error details : {chk_validity['result_detail']}, {received_time}")
         return {'result':'Error',"result_detail": chk_validity['result_detail']}   
     ## 보내는 데이터가 HTS 요청 양식에 맞으면 인코딩해서 보낸다!!    
-    sending_data_encoded = sending_data.encode('euc-kr', errors='ignore')
+    sending_data_encoded = sending_data.encode('euc-kr')
     print(f"send data : {sending_data_encoded} target length : {len(connected_clients)}")
     for client in connected_clients:
         if client.fileno() == -1:
-            print("소켓이 닫혔습니다. /", datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
+            print("소켓이 닫혔습니다.")
             connected_clients.remove(client)
             continue
         client.sendall(sending_data_encoded)
@@ -52,7 +52,7 @@ async def send_message(message: Message):
             print('data????')
             break
         message = data.decode('euc-kr')
-        print(f"클라이언트로부터 받은 메시지: {message} /", datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
+        print(f"클라이언트로부터 받은 메시지: {message}")
         ## 클라이언트가 보낸 데이터가 무엇인지 체그!! 경우의수는 ACK 이거나 에러거나!!
         received_data_chk = tcp_func.check_ack(message)
         ## ACK가 이상할때
@@ -70,10 +70,10 @@ async def send_message(message: Message):
 
 # TCP 서버 실행 (비동기)
 async def run_tcp_server():
-    HOST = '0.0.0.0'  # 서버 IP 주소
-    PORT = 9900  # 서버 포트 번호
-#     HOST = 'localhost'
-#     PORT = 8010
+#     HOST = '0.0.0.0'  # 서버 IP 주소
+#     PORT = 9900  # 서버 포트 번호
+    HOST = 'localhost'
+    PORT = 8010
     ## faspapi가 실행되면서 자동으로 소켓 연결!!!
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((HOST, PORT))
@@ -86,7 +86,7 @@ async def run_tcp_server():
         try:
             global client_socket
             client_socket, addr = await loop.sock_accept(server_socket)
-            print(f"클라이언트 {addr}가 연결되었습니다./", datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
+            print(f"클라이언트 {addr}가 연결되었습니다.")
             connected_clients.append(client_socket)
             loop.create_task(handle_client(client_socket,loop, connected_clients))
         except BlockingIOError:
@@ -100,7 +100,7 @@ async def handle_client(client_socket,loop,connected_clients):
             if not data:
                 break
             message = data.decode('euc-kr')
-            print(f"클라이언트로부터 받은 메시지: {message} /", datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
+            print(f"클라이언트로부터 받은 메시지: {message}")
             ## 클라이언트가 보낸 데이터가 무엇인지 체그!! 경우의수는 ACK 이거나 에러거나!!
             received_data_chk = tcp_func.check_ack(message)
             ## ACK가 이상할때
