@@ -38,7 +38,9 @@ async def send_message(message: Message):
         return {'result':'Error',"result_detail": chk_validity['result_detail']}   
     ## 보내는 데이터가 HTS 요청 양식에 맞으면 인코딩해서 보낸다!!    
     sending_data_encoded = sending_data.encode('euc-kr', errors='ignore')
-    print(f"send data : {sending_data_encoded} target length : {len(connected_clients)}")
+    print(f"send data : {sending_data_encoded} sending object cnt length : {len(connected_clients)}")
+    if len(connected_clients) ==0:
+        return {'result':False, "result_detail": f"No Target Object, {received_time}"}
     for client in connected_clients:
         if client.fileno() == -1:
             print("소켓이 닫혔습니다. /", datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
@@ -49,7 +51,7 @@ async def send_message(message: Message):
         ## 보내고 난 다음 정상 받았는지 확인하자!
         data = await loop.sock_recv(client_socket, 1024)
         if not data:
-            print('data????')
+            print('data????',data, type(data))
             break
         message = data.decode('euc-kr')
         print(f"클라이언트로부터 받은 메시지: {message} /", datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
@@ -63,7 +65,7 @@ async def send_message(message: Message):
         ## ACK가 맞을떄
         else :
             ## 데이터 잘받았어!! 로그 찍고!!! 보내는거는, 나중에 api를 통해서 보낼수 있도록 대기상태!
-            print(f"send data : {message}, data length : {len(message)} // {received_time}")
+            print(f"GOOD send data : {message}, data length : {len(message)} // {received_time}")
             return {'result':True, "result_detail": f"ACK data success, {received_time}"}
         
     
